@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Банковские карточки</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>💳 Банковские предложения</h1>
+  <div id="cards-container"></div>
+
+  <script>
+    fetch('/api/cards')
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('cards-container');
+        data.forEach(card => {
+          const div = document.createElement('div');
+          div.className = 'card';
+          div.innerHTML = `
+            <h2>${card.bank}</h2>
+            <p>Процент: ${card.rate}%</p>
+            <p>Срок: ${card.term} мес.</p>
+            <button onclick="sendToTelegram('${card.bank}', ${card.rate}, ${card.term})">Отправить в Telegram</button>
+          `;
+          container.appendChild(div);
+        });
+      });
+
+    function sendToTelegram(bank, rate, term) {
+      fetch('/send-to-telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bank, rate, term })
+      })
+      .then(res => res.text())
+      .then(msg => alert(msg))
+      .catch(err => alert('Ошибка отправки'));
+    }
+  </script>
+</body>
+</html>
